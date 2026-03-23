@@ -17,9 +17,8 @@ class World(object):
 		self.tiles = [['.' for _ in range(width)] for _ in range(height)]
 		self.zones = []
 
-	def update(self):
+	def update(self, player):
 		# food spawn
-		# player move
 		pass
 
 	def render(self, player):
@@ -37,12 +36,15 @@ class Player(object):
 	def __init__(self, x, y):
 		self.x = x
 		self.y = y
-		self.direction_list = ['North', 'East', 'South', 'West']
+		self.direction_list = ['North', 'South', 'East', 'West']
 		self.direction = self.direction_list[0]
 
-	def move(self, dx, dy, world):
-		self.x = max(0, min(self.x + dx, world.width - 1))
-		self.y = max(0, min(self.y + dy, world.height - 1))
+	def move(self, world):
+		match self.direction:
+			case 'North': self.y = max(0, min(self.y - 1, world.height - 1))
+			case 'South': self.y = max(0, min(self.y + 1, world.height - 1))
+			case 'East': self.x = max(0, min(self.x + 1, world.width - 1))
+			case 'West': self.x = max(0, min(self.x - 1, world.width - 1))
 
 # class Food(object):
 # 	def __init__(self, x, y):
@@ -55,10 +57,14 @@ class Player(object):
 def handle_input(player, world):
 	global isPlaying
 	key = get_key()	# Нажатие клавиши
-	if key == KEY_UP: player.move(0, -1, world)		# Вверх
-	elif key == KEY_DOWN: player.move(0, 1, world)	# Вниз
-	elif key == KEY_LEFT: player.move(-1, 0, world)	# Влево
-	elif key == KEY_RIGHT: player.move(1, 0, world)	# Вправо
+	# if key == KEY_UP: player.move(0, -1, world)		# Вверх
+	# elif key == KEY_DOWN: player.move(0, 1, world)	# Вниз
+	# elif key == KEY_LEFT: player.move(-1, 0, world)	# Влево
+	# elif key == KEY_RIGHT: player.move(1, 0, world)	# Вправо
+	if key == KEY_UP: player.direction = player.direction_list[0]		# Вверх
+	elif key == KEY_DOWN: player.direction = player.direction_list[1]	# Вниз
+	elif key == KEY_RIGHT: player.direction = player.direction_list[2]	# Вправо
+	elif key == KEY_LEFT: player.direction = player.direction_list[3]	# Влево
 	elif key == KEY_QUIT:
 		isPlaying = False
 		print("\nВыход из игры")
@@ -79,7 +85,8 @@ def main():
 	# Основной цикл
 	while isPlaying == True:
 		handle_input(player, world)
-		world.update()
+		player.move(world)
+		world.update(player)
 		print('\n'*25 + f'{world.render(player)}')
 		# world.render(player)
 
