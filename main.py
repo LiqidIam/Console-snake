@@ -15,7 +15,6 @@ class World(object):
 		self.width = width
 		self.height = height
 		self.tiles = [['.' for _ in range(width)] for _ in range(height)]
-		self.zones = []
 
 	def update(self, player):
 		# food spawn
@@ -25,8 +24,13 @@ class World(object):
 		output = ''
 		for y in range(self.height):
 			for x in range(self.width):
-				if x == player.x and y == player.y:
-					output += '@ '
+				pos = [x,y]
+				# print(f'{pos} in {player.body}')
+				if pos in player.body:
+					if pos == player.body[-1]:
+						output += '@ '
+					else:
+						output += 'O '
 				else:
 					output += f'{self.tiles[x][y]} '
 			output += '\n'
@@ -34,32 +38,40 @@ class World(object):
 
 class Player(object):
 	def __init__(self, x, y):
-		self.x = x
-		self.y = y
-		self.direction_list = ['North', 'South', 'East', 'West']
-		self.direction = self.direction_list[0]
+		self.body = [[x,y-1], [x,y]]
+		self.direction = 'North'
 
 	def rotate(self, rotation:str, world):
 		match rotation:
 			case 'up':
-				if self.direction != 'South':
-					self.direction = 'North'
+				self.direction = 'North' if self.direction != 'South' else 'South'
 			case 'down':
-				if self.direction != 'North':
-					self.direction = 'South'
+				self.direction = 'South' if self.direction != 'North' else 'North'
 			case 'right':
-				if self.direction != 'West':
-					self.direction = 'East'
+				self.direction = 'East' if self.direction != 'West' else 'West'
 			case 'left':
-				if self.direction != 'East':
-					self.direction = 'West'
+				self.direction = 'West' if self.direction != 'East' else 'East'
 
 	def move(self, world):
+		x = self.body[-1][0]
+		y = self.body[-1][1]
 		match self.direction:
-			case 'North': self.y = max(0, min(self.y - 1, world.height - 1))
-			case 'South': self.y = max(0, min(self.y + 1, world.height - 1))
-			case 'East': self.x = max(0, min(self.x + 1, world.width - 1))
-			case 'West': self.x = max(0, min(self.x - 1, world.width - 1))
+			case 'North':
+				new_y = max(0, min(y - 1, world.height - 1))
+				new_head = [x, new_y]
+				self.body.append(new_head)
+			case 'South':
+				new_y = max(0, min(y + 1, world.height - 1))
+				new_head = [x, new_y]
+				self.body.append(new_head)
+			case 'East':
+				new_x = max(0, min(x + 1, world.width - 1))
+				new_head = [new_x, y]
+				self.body.append(new_head)
+			case 'West':
+				new_x = max(0, min(x - 1, world.width - 1))
+				new_head = [new_x, y]
+				self.body.append(new_head)
 
 # class Food(object):
 # 	def __init__(self, x, y):
@@ -79,6 +91,7 @@ def handle_input(player, world):
 		global isPlaying
 		isPlaying = False
 		print("\nВыход из игры")
+		print(player.body)
 
 # ========================================
 # Main Game Cycle
@@ -88,7 +101,7 @@ isPlaying = True
 def main():
 	# Инициализация всяких штук
 	world = World()
-	player = Player(1, 3)
+	player = Player(9, 9)
 
 	# world.generate()
 
@@ -97,8 +110,7 @@ def main():
 		handle_input(player, world)
 		player.move(world)
 		world.update(player)
-		print('\n'*25 + f'{world.render(player)}')
-		# world.render(player)
+		print(f'\n{world.render(player)}'+'\n'*42)
 
 		time.sleep(0.25)
 
