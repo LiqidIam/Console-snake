@@ -6,6 +6,8 @@ if platform.system() == 'Windows':
 	def get_key():
 		return msvcrt.getch().decode() if msvcrt.kbhit() else None
 from config import *
+from colorama import init as colorama_init, Fore, Back, Style
+colorama_init(autoreset=True)
 
 # ========================================
 # Classes
@@ -28,26 +30,38 @@ class World(object):
 			self.food.append(new_food)
 
 	def render(self, player, world):
-		output = ''
+		output = []
 		for y in range(self.height):
+			row = ''
 			for x in range(self.width):
 				pos = [x, y]
 				if pos in player.body:
 					if pos == player.body[-1]:
-						output += '@ '
+						row += f'@ '
 					else:
-						output += 'O '
+						row += f'O '
 				elif pos in world.food:
-					output += 'X '
+					row += f'X '
 				else:
-					output += f'{self.tiles[x][y]} '
-			output += '\n'
-		return output
+					row += f'{self.tiles[x][y]} '
+			output.append(row)
+
+		menu = [f'SCORE: {player.score}',
+				'============',
+				f'Amount of food: {AMOUNT_OF_FOOD}',
+				f'Game speed: {GAME_SPEED}x']
+
+		full_screen = []
+		for i, row in enumerate(output):
+			menu_row = menu[i] if i < len(menu) else ' '
+			full_screen.append(row + ' | ' + menu_row)
+		return '\n'.join(full_screen)
 
 class Player(object):
 	def __init__(self, x, y):
 		self.body = [[x, y-1], [x, y]]
 		self.direction = 'North'
+		self.score = 0
 
 	def rotate(self, rotation:str, world):
 		match rotation:
@@ -81,6 +95,7 @@ class Player(object):
 	def eat(self, world):
 		if self.body[-1] in world.food:
 			world.food.pop(world.food.index(self.body[-1]))
+			self.score += 1
 		else:
 			self.body.pop(0)
 
