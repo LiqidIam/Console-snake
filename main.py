@@ -39,6 +39,21 @@ class Player(object):
 		self.direction_list = ['North', 'South', 'East', 'West']
 		self.direction = self.direction_list[0]
 
+	def rotate(self, rotation:str, world):
+		match rotation:
+			case 'up':
+				if self.direction != 'South':
+					self.direction = 'North'
+			case 'down':
+				if self.direction != 'North':
+					self.direction = 'South'
+			case 'right':
+				if self.direction != 'West':
+					self.direction = 'East'
+			case 'left':
+				if self.direction != 'East':
+					self.direction = 'West'
+
 	def move(self, world):
 		match self.direction:
 			case 'North': self.y = max(0, min(self.y - 1, world.height - 1))
@@ -55,20 +70,15 @@ class Player(object):
 # Functions
 # ========================================
 def handle_input(player, world):
-	global isPlaying
 	key = get_key()	# Нажатие клавиши
-	# if key == KEY_UP: player.move(0, -1, world)		# Вверх
-	# elif key == KEY_DOWN: player.move(0, 1, world)	# Вниз
-	# elif key == KEY_LEFT: player.move(-1, 0, world)	# Влево
-	# elif key == KEY_RIGHT: player.move(1, 0, world)	# Вправо
-	if key == KEY_UP: player.direction = player.direction_list[0]		# Вверх
-	elif key == KEY_DOWN: player.direction = player.direction_list[1]	# Вниз
-	elif key == KEY_RIGHT: player.direction = player.direction_list[2]	# Вправо
-	elif key == KEY_LEFT: player.direction = player.direction_list[3]	# Влево
+	if key == KEY_UP: player.rotate('up', world)
+	elif key == KEY_DOWN: player.rotate('down', world)
+	elif key == KEY_RIGHT: player.rotate('right', world)
+	elif key == KEY_LEFT: player.rotate('left', world)
 	elif key == KEY_QUIT:
+		global isPlaying
 		isPlaying = False
 		print("\nВыход из игры")
-		
 
 # ========================================
 # Main Game Cycle
@@ -79,7 +89,7 @@ def main():
 	# Инициализация всяких штук
 	world = World()
 	player = Player(1, 3)
-	
+
 	# world.generate()
 
 	# Основной цикл
