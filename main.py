@@ -15,22 +15,32 @@ class World(object):
 		self.width = width
 		self.height = height
 		self.tiles = [['.' for _ in range(width)] for _ in range(height)]
+		self.food = []
 
 	def update(self, player):
-		# food spawn
-		pass
+		if len(self.food) < 1:
+			new_food = []
+			while True:
+				x = random.randint(0, self.width-1)
+				y = random.randint(0, self.height-1)
+				new_food = [x, y]
+				if new_food not in player.body:
+					self.food.append(new_food)
+					break
 
-	def render(self, player):
+	def render(self, player, world):
 		output = ''
 		for y in range(self.height):
 			for x in range(self.width):
-				pos = [x,y]
+				pos = [x, y]
 				# print(f'{pos} in {player.body}')
 				if pos in player.body:
 					if pos == player.body[-1]:
 						output += '@ '
 					else:
 						output += 'O '
+				elif pos in world.food:
+					output += 'X '
 				else:
 					output += f'{self.tiles[x][y]} '
 			output += '\n'
@@ -38,7 +48,7 @@ class World(object):
 
 class Player(object):
 	def __init__(self, x, y):
-		self.body = [[x,y-1], [x,y]]
+		self.body = [[x, y-1], [x, y]]
 		self.direction = 'North'
 
 	def rotate(self, rotation:str, world):
@@ -59,24 +69,22 @@ class Player(object):
 			case 'North':
 				new_y = max(0, min(y - 1, world.height - 1))
 				new_head = [x, new_y]
-				self.body.append(new_head)
 			case 'South':
 				new_y = max(0, min(y + 1, world.height - 1))
 				new_head = [x, new_y]
-				self.body.append(new_head)
 			case 'East':
 				new_x = max(0, min(x + 1, world.width - 1))
 				new_head = [new_x, y]
-				self.body.append(new_head)
 			case 'West':
 				new_x = max(0, min(x - 1, world.width - 1))
 				new_head = [new_x, y]
-				self.body.append(new_head)
+		self.body.append(new_head)
 
-# class Food(object):
-# 	def __init__(self, x, y):
-# 		self.x = x
-# 		self.y = y
+	def eat(self, world):
+		if self.body[-1] in world.food:
+			world.food.pop()
+		else:
+			self.body.pop(0)
 
 # ========================================
 # Functions
@@ -91,7 +99,6 @@ def handle_input(player, world):
 		global isPlaying
 		isPlaying = False
 		print("\nВыход из игры")
-		print(player.body)
 
 # ========================================
 # Main Game Cycle
@@ -109,8 +116,9 @@ def main():
 	while isPlaying == True:
 		handle_input(player, world)
 		player.move(world)
+		player.eat(world)
 		world.update(player)
-		print(f'\n{world.render(player)}'+'\n'*42)
+		print(f'\n{world.render(player, world)}'+'\n'*42)
 
 		time.sleep(0.25)
 
