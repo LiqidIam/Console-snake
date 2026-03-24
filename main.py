@@ -18,22 +18,20 @@ class World(object):
 		self.food = []
 
 	def update(self, player):
-		if len(self.food) < 1:
+		if len(self.food) < AMOUNT_OF_FOOD:
 			new_food = []
 			while True:
 				x = random.randint(0, self.width-1)
 				y = random.randint(0, self.height-1)
 				new_food = [x, y]
-				if new_food not in player.body:
-					self.food.append(new_food)
-					break
+				if new_food not in player.body and new_food not in self.food: break
+			self.food.append(new_food)
 
 	def render(self, player, world):
 		output = ''
 		for y in range(self.height):
 			for x in range(self.width):
 				pos = [x, y]
-				# print(f'{pos} in {player.body}')
 				if pos in player.body:
 					if pos == player.body[-1]:
 						output += '@ '
@@ -82,7 +80,7 @@ class Player(object):
 
 	def eat(self, world):
 		if self.body[-1] in world.food:
-			world.food.pop()
+			world.food.pop(world.food.index(self.body[-1]))
 		else:
 			self.body.pop(0)
 
@@ -108,7 +106,7 @@ isPlaying = True
 def main():
 	# Инициализация всяких штук
 	world = World()
-	player = Player(9, 9)
+	player = Player(world.width//2, world.height//2)
 
 	# world.generate()
 
@@ -118,9 +116,9 @@ def main():
 		player.move(world)
 		player.eat(world)
 		world.update(player)
-		print(f'\n{world.render(player, world)}'+'\n'*42)
+		print(f'\n{world.render(player, world)}'+'\n'*42, end='')
 
-		time.sleep(0.25)
+		time.sleep(0.25 / GAME_SPEED)
 
 # Запуск игры
 if __name__ == '__main__':
