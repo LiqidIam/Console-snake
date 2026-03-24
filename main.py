@@ -20,6 +20,7 @@ class World(object):
 		self.food = []
 
 	def update(self, player):
+		# Food spawn
 		if len(self.food) < AMOUNT_OF_FOOD:
 			new_food = []
 			while True:
@@ -28,6 +29,10 @@ class World(object):
 				new_food = [x, y]
 				if new_food not in player.body and new_food not in self.food: break
 			self.food.append(new_food)
+
+		# Death check
+		if player.body[-1] in player.body[:-1]:
+			game_quit()
 
 	def render(self, player, world):
 		output = []
@@ -47,7 +52,7 @@ class World(object):
 			output.append(row)
 
 		menu = [f'SCORE: {player.score}',
-				'============',
+				'===============',
 				f'Amount of food: {AMOUNT_OF_FOOD}',
 				f'Game speed: {GAME_SPEED}x']
 
@@ -108,10 +113,12 @@ def handle_input(player, world):
 	elif key == KEY_DOWN: player.rotate('down', world)
 	elif key == KEY_RIGHT: player.rotate('right', world)
 	elif key == KEY_LEFT: player.rotate('left', world)
-	elif key == KEY_QUIT:
-		global isPlaying
-		isPlaying = False
-		print("\nВыход из игры")
+	elif key == KEY_QUIT: game_quit()
+
+def game_quit():
+	global isPlaying
+	isPlaying = False
+	print("\nВыход из игры")
 
 # ========================================
 # Main Game Cycle
