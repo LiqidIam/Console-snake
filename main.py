@@ -6,7 +6,7 @@ if platform.system() == 'Windows':
 	def get_key():
 		return msvcrt.getch().decode() if msvcrt.kbhit() else None
 from config import *
-from colorama import init as colorama_init, Fore, Back, Style
+from colorama import init as colorama_init
 colorama_init(autoreset=True)
 
 # ========================================
@@ -16,7 +16,7 @@ class World(object):
 	def __init__(self, width=20, height=20):
 		self.width = width
 		self.height = height
-		self.tiles = [['.' for _ in range(width)] for _ in range(height)]
+		self.tiles = [[DEFAULT_TILE for _ in range(width)] for _ in range(height)]
 		self.food = []
 
 	def update(self, player):
@@ -37,24 +37,26 @@ class World(object):
 	def render(self, player, world):
 		output = []
 		for y in range(self.height):
-			row = ''
+			row = ' '
 			for x in range(self.width):
 				pos = [x, y]
 				if pos in player.body:
 					if pos == player.body[-1]:
-						row += f'@ '
+						row += PLAYER_HEAD
 					else:
-						row += f'O '
+						row += PLAYER_TAIL
 				elif pos in world.food:
-					row += f'X '
+					row += FOOD
 				else:
-					row += f'{self.tiles[x][y]} '
+					row += f'{self.tiles[x][y]}'
 			output.append(row)
 
 		menu = [f'SCORE: {player.score}',
 				'===============',
 				f'Amount of food: {AMOUNT_OF_FOOD}',
-				f'Game speed: {GAME_SPEED}x']
+				f'Game speed: {GAME_SPEED}x',
+				'===============',
+				f'Theme: {theme}']
 
 		full_screen = []
 		for i, row in enumerate(output):
